@@ -28,6 +28,7 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.security.spec.ECField;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -58,7 +59,7 @@ public class WeatherController extends AppCompatActivity {
     ImageView mWeatherImage,weatherImage1,weatherImage2,weatherImage3,weatherImage4;
     TextView mTemperatureLabel;
     String CurrentLocation="";
-    String time,tempUpdater,time1,time2,time3,time4;
+    String time,tempUpdater,time1,time2,time3,time4,tt1="",tt2="",tt3="",tt4="";
     private Handler mhandler=new Handler();
     // TODO: Declare a LocationManager and a LocationListener here:
     LocationManager mlocationMangaer;
@@ -75,14 +76,26 @@ public class WeatherController extends AppCompatActivity {
             getTimeByCityName();
             getTimeByCityNameForSimulatedCities();
             mCityLabel.setText(tempUpdater+String.format(String.format("\nLocal Time: %s",time)));
-            middleText1.setText(String.format("    Karnal    \nLocal Time: %s",time1));
-            middleText2.setText(String.format("    London    \nLocal Time: %s",time2));
-            middleText3.setText(String.format("    California    \nLocal Time: %s",time3));
-            middleText4.setText(String.format("    Ottawa    \nLocal Time: %s",time4));
-            middleText1.setText(String.format("    Karnal    \nLocal Time: %s",time1));
-            middleText2.setText(String.format("    London    \nLocal Time: %s",time2));
-            middleText3.setText(String.format("    California    \nLocal Time: %s",time3));
-            middleText4.setText(String.format("    Ottawa    \nLocal Time: %s",time4));
+            try{
+                if(!tt1.equals(time1)||!tt2.equals(time2)||!tt3.equals(time3)||!tt4.equals(time4)){
+                    middleText1.setText(String.format("    Karnal    \nLocal Time: %s",time1));
+                    middleText2.setText(String.format("    London    \nLocal Time: %s",time2));
+                    middleText3.setText(String.format("    California    \nLocal Time: %s",time3));
+                    middleText4.setText(String.format("    Ottawa    \nLocal Time: %s",time4));
+                    middleText1.setText(String.format("    Karnal    \nLocal Time: %s",time1));
+                    middleText2.setText(String.format("    London    \nLocal Time: %s",time2));
+                    middleText3.setText(String.format("    California    \nLocal Time: %s",time3));
+                    middleText4.setText(String.format("    Ottawa    \nLocal Time: %s",time4));
+                    if(time1!=null)tt1=time1;
+                    if(time2!=null)tt2=time2;
+                    if(time3!=null)tt3=time3;
+                    if(time4!=null)tt4=time4;
+                }
+            }
+            catch(Exception e){
+
+            }
+
             mhandler.postDelayed(mTimeRunnable,1000);
         }
     };
@@ -155,6 +168,7 @@ public class WeatherController extends AppCompatActivity {
         Intent myIntent=getIntent();
         String city=myIntent.getStringExtra("City");
         startRepeating();
+        tt1=" ";tt2=" ";tt3=" ";tt4=" ";
         if(city!=null){
             getWeatherForNewCity(city);
             CurrentLocation=city;
