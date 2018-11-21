@@ -58,7 +58,7 @@ public class WeatherController extends AppCompatActivity {
     ImageView mWeatherImage,weatherImage1,weatherImage2,weatherImage3,weatherImage4;
     TextView mTemperatureLabel;
     String CurrentLocation="";
-    String time,tempUpdater;
+    String time,tempUpdater,time1,time2,time3,time4;
     private Handler mhandler=new Handler();
     // TODO: Declare a LocationManager and a LocationListener here:
     LocationManager mlocationMangaer;
@@ -75,6 +75,14 @@ public class WeatherController extends AppCompatActivity {
             getTimeByCityName();
             getTimeByCityNameForSimulatedCities();
             mCityLabel.setText(tempUpdater+String.format(String.format("\nLocal Time: %s",time)));
+            middleText1.setText(String.format("    Karnal    \nLocal Time: %s",time1));
+            middleText2.setText(String.format("    London    \nLocal Time: %s",time2));
+            middleText3.setText(String.format("    California    \nLocal Time: %s",time3));
+            middleText4.setText(String.format("    Ottawa    \nLocal Time: %s",time4));
+            middleText1.setText(String.format("    Karnal    \nLocal Time: %s",time1));
+            middleText2.setText(String.format("    London    \nLocal Time: %s",time2));
+            middleText3.setText(String.format("    California    \nLocal Time: %s",time3));
+            middleText4.setText(String.format("    Ottawa    \nLocal Time: %s",time4));
             mhandler.postDelayed(mTimeRunnable,1000);
         }
     };
@@ -127,10 +135,12 @@ public class WeatherController extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 getWeatherForCurrentLocation();
+                getWeatherForCurrentLocation();
             }
         });
 
         getWeatherForSimulatedCities("Karnal","London","california","Ottawa");
+        getWeatherForNewCity(CurrentLocation);
         getWeatherForNewCity(CurrentLocation);
     }
 
@@ -142,7 +152,6 @@ public class WeatherController extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("Cligma", "OnResume() called");
         Intent myIntent=getIntent();
         String city=myIntent.getStringExtra("City");
         startRepeating();
@@ -150,8 +159,8 @@ public class WeatherController extends AppCompatActivity {
             getWeatherForNewCity(city);
             CurrentLocation=city;
         }else{
-            Log.d("Cligma", "Getting weather info");
             if(CurrentLocation!=""){
+                getWeatherForNewCity(CurrentLocation);
                 getWeatherForNewCity(CurrentLocation);
             }else {
 
@@ -184,60 +193,48 @@ public class WeatherController extends AppCompatActivity {
         client1.get(WEATHER_URL,params1,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Cligma", "Success! JSON: "+response.toString());
                 WeatherDataModel weatherData=WeatherDataModel.fromJson(response);
                 updateUIForSimulatedCities1(weatherData);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
         client2.get(WEATHER_URL,params2,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Cligma", "Success! JSON: "+response.toString());
                 WeatherDataModel weatherData=WeatherDataModel.fromJson(response);
                 updateUIForSimulatedCities2(weatherData);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
         client3.get(WEATHER_URL,params3,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Cligma", "Success! JSON: "+response.toString());
                 WeatherDataModel weatherData=WeatherDataModel.fromJson(response);
                 updateUIForSimulatedCities3(weatherData);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
         client4.get(WEATHER_URL,params4,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Cligma", "Success! JSON: "+response.toString());
                 WeatherDataModel weatherData=WeatherDataModel.fromJson(response);
                 updateUIForSimulatedCities4(weatherData);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
@@ -245,9 +242,9 @@ public class WeatherController extends AppCompatActivity {
 
     // TODO: Add getWeatherForNewCity(String city) here:
     private void getWeatherForNewCity(String city){
-        Log.d("Cligma", "getweatherfornewcity() called "+CurrentLocation);
         if(city==""){
-            getWeatherForCurrentLocation();
+            if(CurrentLocation=="")getWeatherForCurrentLocation();
+            else getWeatherForNewCity(CurrentLocation);
         }else{
             RequestParams parms=new RequestParams();
             parms.put("q",city);
@@ -266,25 +263,19 @@ public class WeatherController extends AppCompatActivity {
         client.get(TIME_URL,params,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Time", ""+time);
                 try {
                     time=response.getString("formatted");
-                    Log.d("Time", ""+time);
                     String[] temp=time.split(" ");
                     time=temp[1];
                     String[] temp1=time.split(":");
                     time=temp1[0]+":"+temp1[1];
-                    Log.d("Time", ""+time);
                 }catch (Exception e){
                     e.printStackTrace();
-                    Log.d("Time", ""+e);
                 }
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
@@ -300,22 +291,19 @@ public class WeatherController extends AppCompatActivity {
         client1.get(TIME_URL,params1,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Time", ""+time);
                 try {
-                    String time1=response.getString("formatted");
+                    time1=response.getString("formatted");
                     String[] temp=time1.split(" ");
                     time1=temp[1];
-                    middleText1.setText(String.format("    Karnal    \nLocal Time: %s",time1));
+                    String[] temp1=time1.split(":");
+                    time1=temp1[0]+":"+temp1[1];
                 }catch (Exception e){
                     e.printStackTrace();
-                    Log.d("Time", ""+e);
                 }
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
@@ -329,22 +317,19 @@ public class WeatherController extends AppCompatActivity {
         client2.get(TIME_URL,params2,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Time", ""+time);
                 try {
-                    String time2=response.getString("formatted");
+                    time2=response.getString("formatted");
                     String[] temp=time2.split(" ");
                     time2=temp[1];
-                    middleText2.setText(String.format("    London    \nLocal Time: %s",time2));
+                    String[] temp1=time2.split(":");
+                    time2=temp1[0]+":"+temp1[1];
                 }catch (Exception e){
                     e.printStackTrace();
-                    Log.d("Time", ""+e);
                 }
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
@@ -358,22 +343,19 @@ public class WeatherController extends AppCompatActivity {
         client3.get(TIME_URL,params3,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Time", ""+time);
                 try {
-                    String time3=response.getString("formatted");
+                    time3=response.getString("formatted");
                     String[] temp=time3.split(" ");
                     time3=temp[1];
-                    middleText3.setText(String.format("    California    \nLocal Time: %s",time3));
+                    String[] temp1=time3.split(":");
+                    time3=temp1[0]+":"+temp1[1];
                 }catch (Exception e){
                     e.printStackTrace();
-                    Log.d("Time", ""+e);
                 }
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
@@ -387,22 +369,20 @@ public class WeatherController extends AppCompatActivity {
         client4.get(TIME_URL,params4,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Time", ""+time);
                 try {
-                    String time4=response.getString("formatted");
+                    time4=response.getString("formatted");
                     String[] temp=time4.split(" ");
                     time4=temp[1];
-                    middleText4.setText(String.format("    Ottawa    \nLocal Time: %s",time4));
+                    String[] temp1=time4.split(":");
+                    time4=temp1[0]+":"+temp1[1];
+
                 }catch (Exception e){
                     e.printStackTrace();
-                    Log.d("Time", ""+e);
                 }
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
-                Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
         });
@@ -413,12 +393,8 @@ public class WeatherController extends AppCompatActivity {
         mlocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Log.d("Cligma", "OnLocationChanged() called ");
                 String longitude=String.valueOf(location.getLongitude());
                 String latitude=String.valueOf(location.getLatitude());
-                Log.d("Cligma", "Longitude is : "+longitude);
-                Log.d("Cligma", "Latitude is : "+latitude);
-
                 RequestParams params =new RequestParams();
                 params.put("lat",latitude);
                 params.put("lon",longitude);
@@ -438,9 +414,6 @@ public class WeatherController extends AppCompatActivity {
 
             @Override
             public void onProviderDisabled(String s) {
-                Log.d("Cligma", "onProviderDisabled: called");
-
-
             }
         };
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -476,7 +449,6 @@ public class WeatherController extends AppCompatActivity {
         client.get(WEATHER_URL,params,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
-                Log.d("Cligma", "Success! JSON: "+response.toString());
                 WeatherDataModel weatherData=WeatherDataModel.fromJson(response);
                 try {
                     double latTemp=response.getJSONObject("coord").getDouble("lat");
