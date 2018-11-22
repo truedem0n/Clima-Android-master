@@ -41,7 +41,9 @@ public class WeatherController extends AppCompatActivity {
     final int ResponseCode=123;
     final String WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather";
     final String TIME_URL="http://api.timezonedb.com/v2.1/get-time-zone";
-    String lng,lat;
+    String lng,lat,latForGeoLocation,lonForGeoLocation;
+    Intent myIntent;
+    static boolean done=false;
     // App ID to use OpenWeather data
     final String TIME_APP_ID="IFEFSQG263TH";
     final String APP_ID = "13ede99df506ae362bfdc92589e818b0";
@@ -51,7 +53,7 @@ public class WeatherController extends AppCompatActivity {
     final float MIN_DISTANCE = 1000;
 
     // TODO: Set LOCATION_PROVIDER here:
-    String LOCATION_PROVIDER = LocationManager.NETWORK_PROVIDER;
+    String LOCATION_PROVIDER = LocationManager.GPS_PROVIDER;
 
 
     // Member Variables:
@@ -59,6 +61,7 @@ public class WeatherController extends AppCompatActivity {
     ImageView mWeatherImage,weatherImage1,weatherImage2,weatherImage3,weatherImage4;
     TextView mTemperatureLabel;
     String CurrentLocation="";
+    String RealTimeLocation;
     String time,tempUpdater,time1,time2,time3,time4,tt1="",tt2="",tt3="",tt4="";
     private Handler mhandler=new Handler();
     // TODO: Declare a LocationManager and a LocationListener here:
@@ -103,8 +106,7 @@ public class WeatherController extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_controller_layout);
-
-        // Linking the elements in the layout to Java code
+        Log.d("clima", "onCreate() ");
         mCityLabel = (TextView) findViewById(R.id.locationTV);
         mWeatherImage = (ImageView) findViewById(R.id.weatherSymbolIV);
         mTemperatureLabel = (TextView) findViewById(R.id.tempTV);
@@ -139,22 +141,30 @@ public class WeatherController extends AppCompatActivity {
             public void onClick(View view) {
                 if(CurrentLocation!=""){
                     getWeatherForNewCity(CurrentLocation);
+                    Log.d("clima", "currentLocationReload()  and getWeatherForNewCityCalled()");
                 }else{
                     getWeatherForCurrentLocation();
+                    Log.d("clima", "currentLocationReload()  and getWFCL()");
                 }
             }
         });
         reloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d("clima", "reloadButtonCalled() ");
                 getWeatherForCurrentLocation();
-                getWeatherForCurrentLocation();
+
+
             }
         });
 
         getWeatherForSimulatedCities("Karnal","London","california","Ottawa");
-        getWeatherForNewCity(CurrentLocation);
-        getWeatherForNewCity(CurrentLocation);
+        if(!done){
+            getWeatherForCurrentLocation();
+            getWeatherForCurrentLocation();
+            Log.d("clima", "done1() ");
+            done=true;
+        }
     }
 
 
@@ -165,22 +175,52 @@ public class WeatherController extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Intent myIntent=getIntent();
-        String city=myIntent.getStringExtra("City");
-        startRepeating();
+        myIntent=getIntent();
+        String value=myIntent.getStringExtra("value");
+        boolean defaultMethod=myIntent.getBooleanExtra("defaultMethod",false);
         tt1=" ";tt2=" ";tt3=" ";tt4=" ";
-        if(city!=null){
-            getWeatherForNewCity(city);
-            CurrentLocation=city;
-        }else{
-            if(CurrentLocation!=""){
-                getWeatherForNewCity(CurrentLocation);
-                getWeatherForNewCity(CurrentLocation);
-            }else {
+        if(defaultMethod){
+            getWeatherForNewCity(value);
+            CurrentLocation=value;
+        }else if(!defaultMethod){
+            try{
+                String[] temp=value.split(",");
+                String lat=temp[0];
+                String lon=temp[1];
+                RequestParams params=new RequestParams();
+                Log.d("clima", "lat: "+lat+" lon:"+lon);
+                params.put("lat",lat);
+                params.put("lon",lon);
+                params.put("appId",APP_ID);
+                AsyncHttpClient client=new AsyncHttpClient();
+                client.get(WEATHER_URL,params,new JsonHttpResponseHandler(){
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response){
+                        try {
+                            CurrentLocation=response.getString("name");
+                            getWeatherForNewCity(CurrentLocation);
+                        }catch (Exception e){
 
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
+                        Log.e("clima", "Fail: "+e.toString() );
+                        Log.d("Cligma", "Status Code: "+statusCode);
+                        Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
-        }
+            catch (Exception e){
+                e.printStackTrace();
+            }
 
+        }
+        if(CurrentLocation!=""){
+            getWeatherForNewCity(CurrentLocation);
+        }
+        startRepeating();
     }
 
 
@@ -255,10 +295,17 @@ public class WeatherController extends AppCompatActivity {
     }
 
     // TODO: Add getWeatherForNewCity(String city) here:
+//    private void getWeatherForNewCity(String lat,String lng){
+//
+//        RequestParams parms=new RequestParams();
+//
+//        parms.put("appid",APP_ID);
+//        letsDoSomeNetworking(parms);
+//
+//    }
     private void getWeatherForNewCity(String city){
         if(city==""){
-            if(CurrentLocation=="")getWeatherForCurrentLocation();
-            else getWeatherForNewCity(CurrentLocation);
+            getWeatherForCurrentLocation();
         }else{
             RequestParams parms=new RequestParams();
             parms.put("q",city);
@@ -279,10 +326,12 @@ public class WeatherController extends AppCompatActivity {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
                 try {
                     time=response.getString("formatted");
-                    String[] temp=time.split(" ");
-                    time=temp[1];
-                    String[] temp1=time.split(":");
-                    time=temp1[0]+":"+temp1[1];
+                    if(time!=null){
+                        String[] temp=time.split(" ");
+                        time=temp[1];
+                        String[] temp1=time.split(":");
+                        time=temp1[0]+":"+temp1[1];
+                    }
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -307,10 +356,12 @@ public class WeatherController extends AppCompatActivity {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
                 try {
                     time1=response.getString("formatted");
-                    String[] temp=time1.split(" ");
-                    time1=temp[1];
-                    String[] temp1=time1.split(":");
-                    time1=temp1[0]+":"+temp1[1];
+                    if(time1!=null){
+                        String[] temp=time1.split(" ");
+                        time1=temp[1];
+                        String[] temp1=time1.split(":");
+                        time1=temp1[0]+":"+temp1[1];
+                    }
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -403,6 +454,7 @@ public class WeatherController extends AppCompatActivity {
     }
     // TODO: Add getWeatherForCurrentLocation() here:
     private void getWeatherForCurrentLocation() {
+        Log.d("clima", "getWeatherForCLocCalled() ");
         mlocationMangaer = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mlocationListener = new LocationListener() {
             @Override
@@ -413,6 +465,7 @@ public class WeatherController extends AppCompatActivity {
                 params.put("lat",latitude);
                 params.put("lon",longitude);
                 params.put("appId",APP_ID);
+                Log.d("clima", "onLocationChangedCalled() "+latitude+longitude);
                 letsDoSomeNetworking(params);
             }
 
@@ -430,7 +483,7 @@ public class WeatherController extends AppCompatActivity {
             public void onProviderDisabled(String s) {
             }
         };
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -438,7 +491,7 @@ public class WeatherController extends AppCompatActivity {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_COARSE_LOCATION},ResponseCode );
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION},ResponseCode );
             return;
         }
         mlocationMangaer.requestLocationUpdates(LOCATION_PROVIDER, MIN_TIME, MIN_DISTANCE, mlocationListener);
@@ -451,7 +504,7 @@ public class WeatherController extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if(requestCode==ResponseCode){
             if(grantResults.length>0&& grantResults[0]==PackageManager.PERMISSION_GRANTED){
-                Log.d("Cligma", "onRequestPermissionsResult: Permission Granted");
+                Log.d("Clima", "onRequestPermissionsResult: Permission Granted");
             }else {
                 Log.d("Cligma", "onRequestPermissionsResult: Permission denied");
             }
@@ -460,16 +513,20 @@ public class WeatherController extends AppCompatActivity {
     // TODO: Add letsDoSomeNetworking(RequestParams params) here:
     private void letsDoSomeNetworking(RequestParams params){
         AsyncHttpClient client=new AsyncHttpClient();
+        Log.d("clima", "LetsDoSomeNetworkingCalled() ");
         client.get(WEATHER_URL,params,new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response){
+                Log.d("weather", " "+response.toString());
                 WeatherDataModel weatherData=WeatherDataModel.fromJson(response);
+                Log.d("clima", "OnSuccess() "+response.toString());
+
                 try {
+                    RealTimeLocation=response.getString("name");
                     double latTemp=response.getJSONObject("coord").getDouble("lat");
                     lat=String.valueOf(latTemp);
                     double lngTemp=response.getJSONObject("coord").getDouble("lon");
                     lng=String.valueOf(lngTemp);
-                    getTimeByCityName();
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -478,7 +535,7 @@ public class WeatherController extends AppCompatActivity {
             
             @Override
             public void onFailure(int statusCode, Header[] headers,Throwable e, JSONObject response){
-                Log.e("Cligma", "Fail: "+e.toString() );
+                Log.e("clima", "Fail: "+e.toString() );
                 Log.d("Cligma", "Status Code: "+statusCode);
                 Toast.makeText(WeatherController.this, "Request Failed",Toast.LENGTH_SHORT).show();
             }
@@ -489,10 +546,12 @@ public class WeatherController extends AppCompatActivity {
     // TODO: Add updateUI() here:
     private void updateUI(WeatherDataModel weather){
         mTemperatureLabel.setText(weather.getmTemperature());
+
         mCityLabel.setText(weather.getmCity());
         tempUpdater=mCityLabel.getText().toString();
         int resourceID=getResources().getIdentifier(weather.getmIconName(),"drawable",getPackageName());
         mWeatherImage.setImageResource(resourceID);
+        Log.e("clima", "UpdateUI Called()"+mCityLabel);
     }
 
     private void updateUIForSimulatedCities1(WeatherDataModel weather){

@@ -15,19 +15,19 @@
 
     <ImageButton
         android:id="@+id/reload2"
-        android:layout_width="80dp"
-        android:layout_height="55dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="81dp"
-        android:layout_marginLeft="81dp"
-        android:layout_marginTop="0dp"
-        android:layout_marginEnd="83dp"
-        android:layout_marginRight="83dp"
+        android:layout_marginStart="243dp"
+        android:layout_marginLeft="243dp"
+        android:layout_marginTop="191dp"
+        android:layout_marginEnd="-49dp"
+        android:layout_marginRight="-49dp"
         android:layout_toStartOf="@+id/reload"
         android:layout_toLeftOf="@+id/reload"
         android:layout_toEndOf="@+id/menu"
         android:layout_toRightOf="@+id/menu"
-        android:background="@drawable/ic_refresh"
+        android:background="@drawable/icrefresh"
         android:contentDescription="@string/change_city_description" />
 
     <ImageButton
@@ -40,7 +40,7 @@
         android:layout_marginStart="0dp"
         android:layout_marginLeft="0dp"
         android:layout_marginTop="0dp"
-        android:background="@drawable/ic_menu"
+        android:background="@drawable/icoupe"
         android:contentDescription="@string/change_city_description" />
 
     <TextView
