@@ -5,7 +5,7 @@
     <string name="change_city_description">Click Here to Change City</string>
     <string name="weather_description">This is the weather symbol</string>
     <string name="back_button_description">Dismiss Change City Screen</string>
-    <string name="get_weather">Search City Weather</string>
+    <string name="get_weather">Search City</string>
     <string name="default_query">Select Method</string>
     <string name="default_longitude">Enter Longitude, Latitude</string>
     <string name="by_city">By City Name</string>

@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class changeCityController extends AppCompatActivity {
+    // declaring variables
     private String value;
     Intent newCityIntent;
     Boolean defaultMethod=false;
@@ -24,10 +25,12 @@ public class changeCityController extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_city_layout);
-        hint=(EditText)findViewById(R.id.queryET);
+        //Initializing our objects
+        hint= findViewById(R.id.queryET);
         newCityIntent =new Intent(changeCityController.this,WeatherController.class);
-        setByCityName=(RadioButton)findViewById(R.id.radioButton3);
-        setByCoordinates=(RadioButton)findViewById(R.id.radioButton2);
+        setByCityName= findViewById(R.id.radioButton3);
+        setByCoordinates= findViewById(R.id.radioButton2);
+        // setting listener to radio buttons
         setByCoordinates.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -38,6 +41,7 @@ public class changeCityController extends AppCompatActivity {
                 }
             }
         });
+        // setting listener
         setByCityName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -50,14 +54,16 @@ public class changeCityController extends AppCompatActivity {
         });
 
 
-        final EditText editTextField=(EditText)findViewById(R.id.queryET);
-        ImageButton backButton =(ImageButton)findViewById(R.id.backButton);
+        final EditText editTextField= findViewById(R.id.queryET);
+        ImageButton backButton = findViewById(R.id.backButton);
+        // back button listener
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
+        // listener to our edit box
         editTextField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
